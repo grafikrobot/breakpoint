@@ -1,16 +1,16 @@
 cmake_minimum_required(VERSION 3.12)
-project(breakpoint)
+project(debugging)
 
 if (NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE Debug)
+	set(CMAKE_BUILD_TYPE Debug)
 endif()
 
-add_library(breakpoint)
+add_library(debugging)
 
-target_include_directories(breakpoint PUBLIC
-  $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
-  $<INSTALL_INTERFACE:include>)
+target_include_directories(debugging PUBLIC
+	$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
+	$<INSTALL_INTERFACE:include>)
 
-target_sources(breakpoint PRIVATE
-  $<$<PLATFORM_ID:Windows>:src/windows.cxx>
-  $<$<PLATFORM_ID:Darwin>:src/macos.cxx>)
+file(GLOB SRC ${PROJECT_SOURCE_DIR}/src/*.cxx)
+
+target_sources(debugging PRIVATE ${SRC})
