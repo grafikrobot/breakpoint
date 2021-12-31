@@ -7,7 +7,7 @@ namespace stdx {
 
 bool is_debugger_present() noexcept;
 
-[[gnu::flatten]] void breakpoint()
+[[gnu::flatten]] void breakpoint() noexcept
 {
 	if (is_debugger_present()) psnip_trap();
 }
