@@ -1,0 +1,59 @@
+import testing ;
+import feature ;
+import toolset ;
+
+project /stdx_debugging_tests
+	: requirements
+		<library>/stdx_debugging//stdxdbg
+		<toolset>clang:<cxxflags>-fcolor-diagnostics
+    ;
+
+#|
+	Custom actions to run a test program in the debugger and match the output
+	to a regex expression. The action succeeds if the regex matches, otherwise
+	it fails.
+|#
+
+feature.feature run-with-debugger-regex : : free ;
+toolset.flags $(__name__).run_with_debugger DBG_REGEX <run-with-debugger-regex> ;
+
+rule run_with_debugger
+{
+	local host-os = [ feature.get-values <host-os> : $(3) ] ;
+	local toolset = [ feature.get-values <toolset> : $(3) ] ;
+	# ECHO @@ $(host-os).$(toolset) ;
+	run_with_debugger.$(host-os).$(toolset) $(<) : $(>) ;
+}
+
+actions run_with_debugger.linux.gcc
+{
+	gdb --batch -ex=run "$(>[1]:S=)" | grep -q "$(DBG_REGEX)" > "$(<)"
+}
+
+actions run_with_debugger.linux.clang
+{
+	gdb --batch -ex=run "$(>[1]:S=)" | grep -q "$(DBG_REGEX)" > "$(<)"
+}
+
+# actions run_with_debugger.linux.clang
+# {
+# 	lldb --batch -o run -k kill -k quit "$(>[1]:S=)" | grep -q "$(DBG_REGEX)" > "$(<)"
+# }
+
+for local test in [ glob *_compile_test.cpp ]
+{
+    compile $(test) : requirements <use>/stdx_debugging  ;
+}
+for local test in [ glob *_run_test.cpp ]
+{
+    run $(test) : requirements <use>/stdx_debugging ;
+}
+
+#|--------------------------------------------------------------------------|#
+
+make break_dbg_test.test : break_run_test
+	: @run_with_debugger
+	: <run-with-debugger-regex>breakpoint ;
+make is_debugger_present_dbg_test.test : is_debugger_present_run_test
+	: @run_with_debugger
+	: <run-with-debugger-regex>"Here be debuggers" ;

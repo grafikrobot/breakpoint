@@ -1,0 +1,10 @@
+project /stdx_debugging
+	: source-location src
+	: build-dir .build
+	: requirements
+		<include>include
+	;
+
+lib stdxdbg
+	: [ glob *.cxx ]
+	;
