@@ -1,9 +1,14 @@
 = Overview
 
-This is an implementation of to be proposed WG21 (ISO C++) feature based on
-Isabela Muerte's link:https://github.com/bruxisma/breakpoint[implementation] of
+This is an implementation of proposed WG21 (ISO C++) features:
+
+* `std::breakpoint' (link:https://wg21.link/P2514[P2514]) Causes a debugger to
+  stop at the point of the call.
+* `std::is_debugger_present` (link:https://wg21.link/P2514[P2514]) Indicates if
+  the program is running in a debugger.
+
+This is based on Isabela Muerte's
+link:https://github.com/bruxisma/breakpoint[implementation] of
 link:https://wg21.link/p1279[P1279].
 
 It is used and licensed with Isabela's permission and attribution.
-
-More to come.
