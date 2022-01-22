@@ -1,6 +1,7 @@
 import testing ;
 import feature ;
 import toolset ;
+import sequence ;
 
 project /stdx_debugging_tests
 	: requirements
@@ -19,6 +20,8 @@ toolset.flags $(__name__).run_with_debugger DBG_REGEX <run-with-debugger-regex> 
 
 rule run_with_debugger
 {
+	_ on $(<) = " " ;
+	COUNT on $(<) = [ sequence.length [ on $(<) return $(DBG_REGEX) ] ] ;
 	local host-os = [ feature.get-values <host-os> : $(3) ] ;
 	local toolset = [ feature.get-values <toolset> : $(3) ] ;
 	# ECHO @@ $(host-os).$(toolset) ;
@@ -27,18 +30,22 @@ rule run_with_debugger
 
 actions run_with_debugger.linux.gcc
 {
-	gdb --batch -ex=run "$(>[1]:S=)" | grep -q "$(DBG_REGEX)" > "$(<)"
+	gdb --batch -ex=run -ex=continue "$(>[1]:S=)" > "$(<)" 2>&1
+	awk ' /$(DBG_REGEX)/{++c} END{ if (c != $(COUNT)) { exit 1 } } ' "$(<)"
 }
 
 actions run_with_debugger.linux.clang
 {
-	gdb --batch -ex=run "$(>[1]:S=)" | grep -q "$(DBG_REGEX)" > "$(<)"
+	gdb --batch -ex=run -ex=continue "$(>[1]:S=)" > "$(<)" 2>&1
+	awk ' /$(DBG_REGEX)/{++c} END{ if (c != $(COUNT)) { exit 1 } } ' "$(<)"
 }
 
 # actions run_with_debugger.linux.clang
 # {
-# 	lldb --batch -o run -k kill -k quit "$(>[1]:S=)" | grep -q "$(DBG_REGEX)" > "$(<)"
+# 	lldb --batch -o run -k kill -k quit "$(>[1]:S=)" | grep -P -q "$(DBG_REGEX)" > "$(<)"
 # }
+
+#|--------------------------------------------------------------------------|#
 
 for local test in [ glob *_compile_test.cpp ]
 {
@@ -48,12 +55,22 @@ for local test in [ glob *_run_test.cpp ]
 {
     run $(test) : requirements <use>/stdx_debugging ;
 }
+for local test in [ glob *_run_fail_test.cpp ]
+{
+    run-fail $(test) : requirements <use>/stdx_debugging ;
+}
 
 #|--------------------------------------------------------------------------|#
 
-make break_dbg_test.test : break_run_test
-	: @run_with_debugger
-	: <run-with-debugger-regex>breakpoint ;
+make break_dbg_test.test : breakpoint_if_dbg_run_test
+	:	@run_with_debugger
+	:	<run-with-debugger-regex>"breakpoint trap"
+		<run-with-debugger-regex>"other side"
+		<run-with-debugger-regex>"exited normally"
+	;
 make is_debugger_present_dbg_test.test : is_debugger_present_run_test
-	: @run_with_debugger
-	: <run-with-debugger-regex>"Here be debuggers" ;
+	:	@run_with_debugger
+	:	<run-with-debugger-regex>"Here be debuggers"
+		<run-with-debugger-regex>"exited normally"
+		<run-with-debugger-regex>"not being run"
+	;
