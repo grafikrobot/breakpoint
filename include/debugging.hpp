@@ -5,12 +5,7 @@
 
 namespace stdx {
 
-enum class debugger_query {
-	saved,
-	immediate
-};
-
-bool is_debugger_present(debugger_query q = debugger_query::saved) noexcept;
+bool is_debugger_present() noexcept;
 
 [[gnu::flatten]] inline void breakpoint() noexcept
 {
