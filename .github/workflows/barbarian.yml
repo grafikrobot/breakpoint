@@ -30,7 +30,9 @@ jobs:
                   MATRIX=$(bincrafters-package-tools generate-ci-jobs --platform gha)
                   DELIM=$(uuidgen)
                   echo "${MATRIX}"
-                  echo "matrix<<${DELIM}\n${MATRIX}\n${DELIM}" >> ${GITHUB_OUTPUT}
+                  echo "matrix<<${DELIM}" >> ${GITHUB_OUTPUT}
+                  echo "${MATRIX}" >> ${GITHUB_OUTPUT}
+                  echo "${DELIM}" >> ${GITHUB_OUTPUT}
     conan:
         needs: generate-matrix
         runs-on: ${{ matrix.config.os }}
