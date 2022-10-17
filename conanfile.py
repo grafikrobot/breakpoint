@@ -30,7 +30,7 @@ class Package(ConanFile):
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
     tool_requires = ("b2/[>=4.7.0]@")
-    python_requires = ("b2-conan/[>=1.0.0]@bfgroup/b2-conan")
+    python_requires = ("b2-conan/1.0.0@bfgroup/b2-conan")
 
     def config_options(self):
         if self.settings.os == "Windows":
